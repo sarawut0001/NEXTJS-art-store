@@ -1,8 +1,9 @@
 import { signupSchema, signinSchema } from "@/features/auths/schemas/auths";
+import { getUserById } from "@/features/users/db/users";
 import { db } from "@/lib/db";
 import { genSalt, hash, compare } from "bcrypt";
 import { SignJWT } from "jose";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 interface SignupInput {
   name: string;
@@ -120,4 +121,12 @@ export const signin = async (input: SigninInput) => {
       message: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
     };
   }
+};
+
+export const authCheck = async () => {
+  // const head = await headers();
+  // const userId = head.get("x-user-id");
+  const userId = (await headers()).get("x-user-id");
+
+  return userId ? await getUserById(userId) : null;
 };

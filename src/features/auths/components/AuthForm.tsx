@@ -7,6 +7,7 @@ import Form from "next/form";
 import AuthFooter from "./AuthFooter";
 import { useForm } from "@/hooks/useForm";
 import { authAction } from "../action/auths";
+import ErrorMessage from "@/components/shared/ErrorMessage";
 
 interface AuthFormProps {
   type: "signup" | "signin";
@@ -26,9 +27,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
   ) => (
     <div>
       <InputForm label={label} id={id} type={type} required={requred} />
-      {errors[id] && (
-        <span className="text-sm text-red-500">{errors[id][0]}</span>
-      )}
+      {errors[id] && <ErrorMessage error={errors[id][0]} />}
     </div>
   );
 

@@ -1,6 +1,6 @@
-import { signupSchema } from "@/features/auths/schemas/auths";
+import { signupSchema, signinSchema } from "@/features/auths/schemas/auths";
 import { db } from "@/lib/db";
-import { genSalt, hash } from "bcrypt";
+import { genSalt, hash, compare } from "bcrypt";
 import { SignJWT } from "jose";
 import { cookies } from "next/headers";
 
@@ -9,6 +9,11 @@ interface SignupInput {
   email: string;
   password: string;
   confirmPassword: string;
+}
+
+interface SigninInput {
+  email: string;
+  password: string;
 }
 
 const generateJwtToken = async (userId: string) => {
@@ -68,6 +73,51 @@ export const signup = async (input: SignupInput) => {
     console.error("Error sign up user:", error);
     return {
       message: "เกิดข้อผิดพลาดในการสมัครสมาชิก",
+    };
+  }
+};
+
+export const signin = async (input: SigninInput) => {
+  try {
+    const { success, data, error } = signinSchema.safeParse(input);
+
+    if (!success) {
+      return {
+        message: "กรุณากรอกข้อมูลให้ถูกต้อง",
+        error: error.flatten().fieldErrors,
+      };
+    }
+
+    const user = await db.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (!user) {
+      return {
+        message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      };
+    }
+
+    if (user.status !== "Active") {
+      return {
+        message: "บัญชีของคุณไม่พร้อมใช้งาน",
+      };
+    }
+
+    const isValidPassword = await compare(data.password, user.password);
+
+    if (!isValidPassword) {
+      return {
+        message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      };
+    }
+
+    const token = await generateJwtToken(user.id);
+    await setCookieToken(token);
+  } catch (error) {
+    console.error("Error sign in user: ", error);
+    return {
+      message: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
     };
   }
 };

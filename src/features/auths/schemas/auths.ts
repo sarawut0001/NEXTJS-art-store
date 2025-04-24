@@ -66,3 +66,15 @@ export const signupSchema = z
     message: ERROR_MESSAGE.confirmPassword,
     path: ["confirmPassword"],
   });
+
+// Main Signin Schema
+export const signinSchema = z.object({
+  email: z
+    .string()
+    .email({ message: ERROR_MESSAGE.email.format })
+    .refine((email) => isvalidEmainDomain(email), {
+      message: ERROR_MESSAGE.email.domain,
+    }),
+
+  password: passwordSchema,
+});

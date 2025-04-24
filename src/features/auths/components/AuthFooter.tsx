@@ -21,7 +21,7 @@ const AuthFooter = ({ type }: AuthFooterProps) => {
   const { footerText, linkText, linkHref } = authTextMap[type];
 
   return (
-    <div>
+    <div className="pt-4">
       <p className="text-accent-foreground">
         {footerText}{" "}
         <Link href={linkHref} className="text-primary hover:underline">

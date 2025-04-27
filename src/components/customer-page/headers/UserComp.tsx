@@ -18,3 +18,7 @@ export const AuthButton = () => {
     </div>
   );
 };
+
+// export const signoutButton = () => {
+//   return <div>SSSS</div>;
+// };

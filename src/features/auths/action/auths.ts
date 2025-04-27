@@ -1,7 +1,7 @@
 "use server";
 
 import { InitialFormState } from "@/types/action";
-import { signin, signup } from "@/features/auths/db/auths";
+import { signin, signup, signout } from "@/features/auths/db/auths";
 
 export const authAction = async (
   _prevState: InitialFormState,
@@ -26,4 +26,11 @@ export const authAction = async (
           ? "สมัครสมาชิกสำเร็จ"
           : "เข้าสู่ระบบสำเร็จ",
       };
+};
+
+export const signoutAction = async () => {
+  const result = await signout();
+  return result && result.message
+    ? { success: false, message: result.message }
+    : { success: true, message: "ออกจากระบบสำเร็จ" };
 };

@@ -134,10 +134,11 @@ export const authCheck = async () => {
   return userId ? await getUserById(userId) : null;
 };
 
-// export const signout = async () => {
-//   try {
-
-//   } catch (error) {
-
-//   }
-// }
+export const signout = async () => {
+  try {
+    (await cookies()).delete("token");
+  } catch (error) {
+    console.error("Error sign out user: ", error);
+    return { message: "เกิดข้อผิดพลาดในการออกจากระบบ" };
+  }
+};

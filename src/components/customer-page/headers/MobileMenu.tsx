@@ -10,7 +10,10 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { UserType } from "@/types/user";
-import { AuthButton } from "@/components/customer-page/headers/UserComp";
+import {
+  AuthButton,
+  SignoutButton,
+} from "@/components/customer-page/headers/UserComp";
 
 interface MobileMenuProps {
   user: UserType | null;
@@ -44,7 +47,7 @@ const MobileMenu = ({ user }: MobileMenuProps) => {
 
           {user && (
             <SheetFooter>
-              <div>Sign out button</div>
+              <SignoutButton />
             </SheetFooter>
           )}
         </div>

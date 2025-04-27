@@ -1,5 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
+import { useSignout } from "@/hooks/useSignout";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export const AuthButton = () => {
@@ -19,6 +23,23 @@ export const AuthButton = () => {
   );
 };
 
-// export const signoutButton = () => {
-//   return <div>SSSS</div>;
-// };
+export const SignoutButton = () => {
+  const { isPending, handleSignout } = useSignout();
+
+  return (
+    <SheetClose asChild>
+      <Button
+        variant="destructive"
+        size="lg"
+        disabled={isPending}
+        onClick={handleSignout}
+      >
+        {isPending ? (
+          <Loader2 size={20} className="animate-spin" />
+        ) : (
+          "ออกจากระบบ"
+        )}
+      </Button>
+    </SheetClose>
+  );
+};

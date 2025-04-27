@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SheetClose } from "@/components/ui/sheet";
 import { useSignout } from "@/hooks/useSignout";
 import { UserType } from "@/types/user";
-import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserCompProps {
   user: UserType;
@@ -30,24 +30,33 @@ export const AuthButton = () => {
   );
 };
 
-export const SignoutButton = () => {
+export const SignoutButton = ({ isMobile = false }) => {
   const { isPending, handleSignout } = useSignout();
 
+  if (isMobile) {
+    return (
+      <SheetClose asChild>
+        <Button
+          variant="destructive"
+          size="lg"
+          disabled={isPending}
+          onClick={handleSignout}
+        >
+          ออกจากระบบ
+        </Button>
+      </SheetClose>
+    );
+  }
+
   return (
-    <SheetClose asChild>
-      <Button
-        variant="destructive"
-        size="lg"
-        disabled={isPending}
-        onClick={handleSignout}
-      >
-        {isPending ? (
-          <Loader2 size={20} className="animate-spin" />
-        ) : (
-          "ออกจากระบบ"
-        )}
-      </Button>
-    </SheetClose>
+    <Button
+      variant="destructive"
+      className="w-full mt-4"
+      disabled={isPending}
+      onClick={handleSignout}
+    >
+      ออกจากระบบ
+    </Button>
   );
 };
 
@@ -70,4 +79,26 @@ export const UserAvatar = ({ user }: UserCompProps) => (
       </CardContent>
     </Card>
   </div>
+);
+
+export const UserAvatarSmall = ({ user }: UserCompProps) => (
+  <Avatar className="border-2 border-primary">
+    <AvatarImage src={user.picture || undefined} alt={user.name || "User"} />
+    <AvatarFallback className="bg-primary text-primary-foreground">
+      {user.name
+        ? user.name.slice(0, 2).toUpperCase()
+        : user.email.slice(0, 2).toUpperCase()}
+    </AvatarFallback>
+  </Avatar>
+);
+
+export const UserDropdownAvatar = ({ user }: UserCompProps) => (
+  <Avatar className="size-16 border-2 border-primary">
+    <AvatarImage src={user.picture || undefined} alt={user.name || "User"} />
+    <AvatarFallback className="text-lg">
+      {user.name
+        ? user.name.slice(0, 2).toUpperCase()
+        : user.email.slice(0, 2).toUpperCase()}
+    </AvatarFallback>
+  </Avatar>
 );

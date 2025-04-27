@@ -3,7 +3,6 @@ import { Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
-  //   SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -13,6 +12,7 @@ import { UserType } from "@/types/user";
 import {
   AuthButton,
   SignoutButton,
+  UserAvatar,
 } from "@/components/customer-page/headers/UserComp";
 
 interface MobileMenuProps {
@@ -38,7 +38,7 @@ const MobileMenu = ({ user }: MobileMenuProps) => {
         <div>
           {/* User Profile && Auth Button */}
 
-          {user ? <div>User Profile</div> : <AuthButton />}
+          {user ? <UserAvatar user={user} /> : <AuthButton />}
 
           {/* Nav Link */}
 

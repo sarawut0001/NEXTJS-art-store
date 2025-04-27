@@ -133,3 +133,11 @@ export const authCheck = async () => {
 
   return userId ? await getUserById(userId) : null;
 };
+
+// export const signout = async () => {
+//   try {
+
+//   } catch (error) {
+
+//   }
+// }

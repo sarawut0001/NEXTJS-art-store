@@ -1,4 +1,6 @@
+import SidebarAdmin from "@/components/admin-page/sidebar/SidebarAdmin";
 import { authCheck } from "@/features/auths/db/auths";
+import { SidebarProvider } from "@/providers/SidebarProvider";
 import { redirect } from "next/navigation";
 
 interface AdminLayoutProps {
@@ -12,16 +14,18 @@ const AdminLayout = async ({ children }: AdminLayoutProps) => {
     redirect("/");
   }
   return (
-    <div className="flex bg-background min-h-svh">
-      <div>Sidbar</div>
+    <SidebarProvider>
+      <div className="flex bg-background min-h-svh">
+        <SidebarAdmin user={user} />
 
-      <div className="flex-1 flex flex-col">
-        <div>Navbar</div>
-        <main className="flex-1 overflow-y-auto md:ml-64 pt-16 p-4 md:px-6 transition-all duration-200">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col">
+          {/* <div>Navbar</div> */}
+          <main className="flex-1 overflow-y-auto md:ml-64 pt-16 p-4 md:px-6 transition-all duration-200">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 export default AdminLayout;

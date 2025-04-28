@@ -106,6 +106,7 @@ const SidebarAdmin = ({ user }: SidebarAdminProps) => {
                     href={link.href}
                     icon={link.icon}
                     isActive={pathname === link.href}
+                    onClose={toggleSidebar}
                   />
                 ))}
               </nav>

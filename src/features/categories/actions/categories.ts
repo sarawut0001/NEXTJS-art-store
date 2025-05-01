@@ -1,7 +1,10 @@
 "use server";
 
 import { InitialFormState } from "@/types/action";
-import { createCategory } from "@/features/categories/db/categories";
+import {
+  createCategory,
+  updateCategory,
+} from "@/features/categories/db/categories";
 
 export const categoryAction = async (
   _prevState: InitialFormState,
@@ -12,7 +15,9 @@ export const categoryAction = async (
     name: formData.get("category-name") as string,
   };
 
-  const result = await createCategory(rawData);
+  const result = rawData.id
+    ? await updateCategory(rawData)
+    : await createCategory(rawData);
 
   return result && result.message
     ? {

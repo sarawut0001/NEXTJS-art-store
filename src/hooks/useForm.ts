@@ -1,4 +1,4 @@
-import { useState, useEffect, useActionState } from "react";
+import { useState, useEffect, useActionState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ActionType, initialFormState } from "@/types/action";
 import { toast } from "sonner";
@@ -26,9 +26,10 @@ export const useForm = (action: ActionType, route?: string) => {
     }
   }, [state, route, router]);
 
-  const clearErrors = () => setErrors({});
+  const clearErrors = useCallback(() => setErrors({}), []);
 
   return {
+    state,
     errors,
     formAction,
     isPending,

@@ -63,11 +63,11 @@ const CategoriesPage = async () => {
         <div className="lg:col-span-1 ">
           <CategoryForm />
         </div>
-      </div>
 
-      {/* List */}
-      <div>
-        <CategoryList categories={categories} />
+        {/* List */}
+        <div className="lg:col-span-2">
+          <CategoryList categories={categories} />
+        </div>
       </div>
     </div>
   );

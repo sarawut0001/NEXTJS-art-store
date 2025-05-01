@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import CategoryForm from "@/features/categories/components/CategoryForm";
+import CategoryList from "@/features/categories/components/CategoryList";
 import { getCategories } from "@/features/categories/db/categories";
 
 const CategoriesPage = async () => {
@@ -62,8 +63,11 @@ const CategoriesPage = async () => {
         <div className="lg:col-span-1 ">
           <CategoryForm />
         </div>
+      </div>
 
-        {/* <div>Test</div> */}
+      {/* List */}
+      <div>
+        <CategoryList categories={categories} />
       </div>
     </div>
   );

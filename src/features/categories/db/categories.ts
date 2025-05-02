@@ -11,6 +11,7 @@ import {
   canUpdateCategory,
 } from "../permissions/categories";
 import { redirect } from "next/navigation";
+import { CategoryStatus } from "@prisma/client";
 
 interface CreateCategoryInput {
   name: string;
@@ -131,4 +132,46 @@ export const updateCategory = async (input: UpdateCategoryInput) => {
     console.error("Error updating category: ", error);
     return { message: "Something went wrong. Please try again later" };
   }
+};
+
+export const changeCategoryStatus = async (
+  id: string,
+  status: CategoryStatus
+) => {
+  const user = await authCheck();
+
+  if (!user || !canUpdateCategory) {
+    redirect("/");
+  }
+
+  try {
+    // Check if category exists
+    const existsCategory = await db.category.findUnique({
+      where: { id },
+    });
+
+    if (!existsCategory) {
+      return { message: "Category not found" };
+    }
+
+    // If status is already
+    if (existsCategory.status === status) {
+      return { message: `Category is already ${status.toLocaleLowerCase()}` };
+    }
+
+    // Update status
+    const updatedCategory = await db.category.update({
+      where: { id },
+      data: { status },
+    });
+
+    revalidateCategoryCache(updatedCategory.id);
+  } catch (error) {
+    console.error("Error changing category status: ", error);
+    return { message: "Something went wrong. Please try again later" };
+  }
+};
+
+export const removeCategory = async (id: string) => {
+  return await changeCategoryStatus(id, "Inactive");
 };

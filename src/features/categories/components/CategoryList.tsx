@@ -17,6 +17,7 @@ import { CategoryType } from "@/types/category";
 import { MoreVertical, Pencil, Search, Trash2 } from "lucide-react";
 import EditCategoryModal from "./EditCategoryModal";
 import { useState } from "react";
+import DeleteCategoryModal from "./DeleteCategoryModal";
 
 interface CategoryListProps {
   categories: CategoryType[];
@@ -24,6 +25,7 @@ interface CategoryListProps {
 
 const CategoryList = ({ categories }: CategoryListProps) => {
   const [isEditModal, setIsEditModal] = useState(false);
+  const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(
     null
   );
@@ -31,6 +33,11 @@ const CategoryList = ({ categories }: CategoryListProps) => {
   const handleEditClick = (cat: CategoryType) => {
     setSelectedCategory(cat);
     setIsEditModal(true);
+  };
+
+  const handleDeleteClick = (cat: CategoryType) => {
+    setSelectedCategory(cat);
+    setIsDeleteModal(true);
   };
 
   return (
@@ -104,7 +111,12 @@ const CategoryList = ({ categories }: CategoryListProps) => {
                       >
                         <Pencil size={15} />
                       </Button>
-                      <Button variant="ghost" size="icon" className="size-7">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7"
+                        onClick={() => handleDeleteClick(cat)}
+                      >
                         <Trash2 size={15} />
                       </Button>
                     </div>
@@ -132,7 +144,9 @@ const CategoryList = ({ categories }: CategoryListProps) => {
 
                           <DropdownMenuSeparator />
 
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteClick(cat)}
+                          >
                             <Trash2 size={15} className="text-destructive" />
                             <span className="text-destructive">Delete</span>
                           </DropdownMenuItem>
@@ -154,6 +168,12 @@ const CategoryList = ({ categories }: CategoryListProps) => {
       <EditCategoryModal
         open={isEditModal}
         onOpenChange={setIsEditModal}
+        category={selectedCategory}
+      />
+
+      <DeleteCategoryModal
+        open={isDeleteModal}
+        onOpenChange={setIsDeleteModal}
         category={selectedCategory}
       />
     </>

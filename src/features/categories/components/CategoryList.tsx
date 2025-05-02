@@ -16,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CategoryType } from "@/types/category";
 import { MoreVertical, Pencil, RefreshCcw, Search, Trash2 } from "lucide-react";
 import EditCategoryModal from "./EditCategoryModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteCategoryModal from "./DeleteCategoryModal";
 import RestoreCategoryModal from "./RestoreCategoryModal";
 
@@ -25,12 +25,29 @@ interface CategoryListProps {
 }
 
 const CategoryList = ({ categories }: CategoryListProps) => {
+  const [activeTab, setActiveTab] = useState("all");
+  const [filteredCategories, setFilteredCategories] =
+    useState<CategoryType[]>(categories);
+
+  // Modal State
   const [isEditModal, setIsEditModal] = useState(false);
   const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [isRestoreModal, setIsRestoreModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(
     null
   );
+
+  useEffect(() => {
+    let result = [...categories];
+
+    if (activeTab === "active") {
+      result = result.filter((c) => c.status === "Active");
+    } else if (activeTab === "inactive") {
+      result = result.filter((c) => c.status === "Inactive");
+    }
+
+    setFilteredCategories(result);
+  }, [categories, activeTab]);
 
   const handleEditClick = (cat: CategoryType) => {
     setSelectedCategory(cat);
@@ -47,13 +64,17 @@ const CategoryList = ({ categories }: CategoryListProps) => {
     setIsRestoreModal(true);
   };
 
+  const handleTabActive = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <>
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="text-lg sm:text-xl">Category List</CardTitle>
 
-          <Tabs>
+          <Tabs value={activeTab} onValueChange={handleTabActive}>
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="all">All Category</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
@@ -84,8 +105,8 @@ const CategoryList = ({ categories }: CategoryListProps) => {
           </div>
 
           <ScrollArea className="h-[350px] sm:h-[420px]">
-            {categories.length > 0 ? (
-              categories.map((cat, index) => (
+            {filteredCategories.length > 0 ? (
+              filteredCategories.map((cat, index) => (
                 <div
                   key={index}
                   className="grid grid-cols-12 py-3 px-2 sm:px-4 border-t items-center hover:bg-gray-50 transition-colors duration-100 text-sm"

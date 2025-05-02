@@ -29,6 +29,8 @@ const CategoryList = ({ categories }: CategoryListProps) => {
   const [filteredCategories, setFilteredCategories] =
     useState<CategoryType[]>(categories);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Modal State
   const [isEditModal, setIsEditModal] = useState(false);
   const [isDeleteModal, setIsDeleteModal] = useState(false);
@@ -46,8 +48,14 @@ const CategoryList = ({ categories }: CategoryListProps) => {
       result = result.filter((c) => c.status === "Inactive");
     }
 
+    if (searchTerm) {
+      result = result.filter((c) =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
     setFilteredCategories(result);
-  }, [categories, activeTab]);
+  }, [categories, activeTab, searchTerm]);
 
   const handleEditClick = (cat: CategoryType) => {
     setSelectedCategory(cat);
@@ -68,6 +76,10 @@ const CategoryList = ({ categories }: CategoryListProps) => {
     setActiveTab(value);
   };
 
+  const handleSearchTerm = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <>
       <Card>
@@ -86,7 +98,12 @@ const CategoryList = ({ categories }: CategoryListProps) => {
                 size={16}
                 className="absolute left-2 top-2.5 text-muted-foreground"
               />
-              <Input placeholder="Search categories..." className="pl-8" />
+              <Input
+                placeholder="Search categories..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={handleSearchTerm}
+              />
             </div>
           </Tabs>
         </CardHeader>

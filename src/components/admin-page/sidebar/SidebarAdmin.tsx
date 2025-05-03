@@ -2,7 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FolderTree, LayoutDashboard, LogOut, X } from "lucide-react";
+import {
+  FolderTree,
+  LayoutDashboard,
+  LogOut,
+  ShoppingCart,
+  X,
+} from "lucide-react";
 import { useSidebar } from "@/providers/SidebarProvider";
 import Link from "next/link";
 import { UserType } from "@/types/user";
@@ -29,6 +35,11 @@ const SidebarAdmin = ({ user }: SidebarAdminProps) => {
       label: "Category",
       href: "/admin/categories",
       icon: <FolderTree size={20} />,
+    },
+    {
+      label: "Products",
+      href: "/admin/products",
+      icon: <ShoppingCart size={20} />,
     },
   ];
 

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { ProductType } from "@/types/product";
 import {
   Eye,
   MoreVertical,
@@ -31,7 +32,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
-const ProductList = () => {
+interface ProductListProps {
+  products: ProductType[];
+}
+
+const ProductList = ({ products }: ProductListProps) => {
   return (
     <>
       <Card>
@@ -58,20 +63,35 @@ const ProductList = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-4">
               <div className="flex gap-2">
                 <Badge variant="outline" className="sm:px-3 py-1">
-                  <span className="font-semibold text-blue-600">0</span>Total
+                  <span className="font-semibold text-blue-600">
+                    {products.length}
+                  </span>
+                  Total
                 </Badge>
 
                 <Badge variant="outline" className="sm:px-3 py-1">
-                  <span className="font-semibold text-green-600">0</span>Active
+                  <span className="font-semibold text-green-600">
+                    {products.filter((p) => p.status === "Active").length}
+                  </span>
+                  Active
                 </Badge>
 
                 <Badge variant="outline" className="sm:px-3 py-1">
-                  <span className="font-semibold text-gray-600">0</span>Inactive
+                  <span className="font-semibold text-gray-600">
+                    {products.filter((p) => p.status === "Inactive").length}
+                  </span>
+                  Inactive
                 </Badge>
 
                 <Badge variant="outline" className="sm:px-3 py-1">
-                  <span className="font-semibold text-amber-600">0</span>Low
-                  Stock
+                  <span className="font-semibold text-amber-600">
+                    {
+                      products.filter(
+                        (p) => p.stock <= p.lowStock && p.status === "Active"
+                      ).length
+                    }
+                  </span>
+                  Low Stock
                 </Badge>
               </div>
 
@@ -101,83 +121,115 @@ const ProductList = () => {
             </TableHeader>
 
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <Image
-                    alt="main-product-image"
-                    src="/images/no-product-image.webp"
-                    width={40}
-                    height={40}
-                    className="object-cover rounded-md"
-                  />
-                </TableCell>
+              {products.length > 0 ? (
+                products.map((p, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Image
+                        alt={p.title}
+                        src="/images/no-product-image.webp"
+                        width={40}
+                        height={40}
+                        className="object-cover rounded-md"
+                      />
+                    </TableCell>
 
-                <TableCell>
-                  <div className="font-medium">P1</div>
-                  <div className="text-xs text-muted-foreground">No SKU</div>
-                </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{p.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {p.sku || "No SKU"}
+                      </div>
+                    </TableCell>
 
-                <TableCell>
-                  <div className="text-sm">C1</div>
-                </TableCell>
+                    <TableCell>
+                      <div className="text-sm">{p.category.name}</div>
+                    </TableCell>
 
-                <TableCell>
-                  <div className="text-sm font-medium">100</div>
-                  <div className="text-xs line-through text-muted-foreground">
-                    200
-                  </div>
-                </TableCell>
-
-                <TableCell>
-                  <div
-                    className={cn("text-sm", {
-                      "text-amber-500 font-medium": true,
-                    })}
-                  >
-                    50
-                  </div>
-                </TableCell>
-
-                <TableCell>
-                  <Badge>Active</Badge>
-                </TableCell>
-
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-8">
-                        <MoreVertical size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye size={15} />
-                        <span>View</span>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem>
-                        <Pencil size={15} />
-                        <span>Edit</span>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
-
-                      {true ? (
-                        <DropdownMenuItem>
-                          <Trash2 size={15} className="text-destructive" />
-                          <span className="text-destructive">Delete</span>
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem>
-                          <RefreshCcw size={15} className="text-green-600" />
-                          <span className="text-green-600">Restore</span>
-                        </DropdownMenuItem>
+                    <TableCell>
+                      <div className="text-sm font-medium">
+                        {p.price.toLocaleString()}
+                      </div>
+                      {p.basePrice !== p.price && (
+                        <div className="text-xs line-through text-muted-foreground">
+                          {p.basePrice.toLocaleString()}
+                        </div>
                       )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+                    </TableCell>
+
+                    <TableCell>
+                      <div
+                        className={cn("text-sm", {
+                          "text-amber-500 font-medium": p.stock <= p.lowStock,
+                        })}
+                      >
+                        {p.stock}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge
+                        variant={
+                          p.status === "Active" ? "default" : "destructive"
+                        }
+                      >
+                        {p.status}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                          >
+                            <MoreVertical size={16} />
+                          </Button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye size={15} />
+                            <span>View</span>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem>
+                            <Pencil size={15} />
+                            <span>Edit</span>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuSeparator />
+
+                          {p.status === "Active" ? (
+                            <DropdownMenuItem>
+                              <Trash2 size={15} className="text-destructive" />
+                              <span className="text-destructive">Delete</span>
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem>
+                              <RefreshCcw
+                                size={15}
+                                className="text-green-600"
+                              />
+                              <span className="text-green-600">Restore</span>
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center h-40 text-muted-foreground"
+                  >
+                    No products found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

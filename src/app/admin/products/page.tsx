@@ -1,6 +1,9 @@
 import ProductList from "@/features/products/components/ProductList";
+import { getProducts } from "@/features/products/db/products";
 
-const ProductAdminPage = () => {
+const ProductAdminPage = async () => {
+  const products = await getProducts();
+
   return (
     <div className="p-4 sm:p-6">
       {/* Product Header */}
@@ -17,7 +20,7 @@ const ProductAdminPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Product List */}
         <div className="lg:col-span-3">
-          <ProductList />
+          <ProductList products={products} />
         </div>
       </div>
     </div>

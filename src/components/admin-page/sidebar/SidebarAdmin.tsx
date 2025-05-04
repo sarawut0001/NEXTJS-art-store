@@ -48,7 +48,7 @@ const SidebarAdmin = ({ user }: SidebarAdminProps) => {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-muted-foreground z-40 md:hidden"
           onClick={toggleSidebar}
         />
       )}
@@ -56,7 +56,7 @@ const SidebarAdmin = ({ user }: SidebarAdminProps) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-svh w-64 border-r flex flex-col transition-all duration-200",
+          "fixed top-0 left-0 z-40 h-svh w-64 border-r flex flex-col transition-all duration-200 bg-white",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >

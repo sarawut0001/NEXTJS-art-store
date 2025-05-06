@@ -26,14 +26,20 @@ import Form from "next/form";
 import { useState } from "react";
 import { productAction } from "../actions/products";
 import ErrorMessage from "@/components/shared/ErrorMessage";
+import ProductImageUpload from "./ProductImageUpload";
 
 interface ProductFormProps {
   categories: CategoryType[];
 }
 
 const ProductForm = ({ categories }: ProductFormProps) => {
+  // Price State
   const [basePrice, setBasePrice] = useState("");
   const [salePrice, setSalePrice] = useState("");
+
+  // Image State
+  const [productImages, setProductImages] = useState<File[]>([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
 
   const { errors, formAction, isPending, clearErrors } = useForm(
     productAction,
@@ -53,6 +59,22 @@ const ProductForm = ({ categories }: ProductFormProps) => {
     return `${discount.toFixed(2)}%`;
   };
 
+  const handleImageChange = (images: File[], mainIndex: number) => {
+    setProductImages(images);
+    setMainImageIndex(mainIndex);
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    if (productImages.length > 0) {
+      productImages.forEach((file) => {
+        formData.append("images", file);
+      });
+      formData.append("main-image-index", mainImageIndex.toString());
+    }
+
+    return formAction(formData);
+  };
+
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
@@ -63,7 +85,7 @@ const ProductForm = ({ categories }: ProductFormProps) => {
       </CardHeader>
 
       <Form
-        action={formAction}
+        action={handleSubmit}
         onChange={clearErrors}
         className="flex flex-col gap-4"
       >
@@ -125,6 +147,9 @@ const ProductForm = ({ categories }: ProductFormProps) => {
             </div>
           </div>
 
+          {/* Product Image Section */}
+          <ProductImageUpload onImageChange={handleImageChange} />
+
           {/* Pricing Information */}
           <div className="flex flex-col gap-4">
             <h3 className="font-medium">Pricing Information</h3>
@@ -171,7 +196,7 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                   step="0.01"
                   placeholder="0.00"
                   required
-                  value={salePrice}
+                  defaultValue={basePrice}
                   onChange={(event) => setSalePrice(event.target.value)}
                 />
                 {errors.price && <ErrorMessage error={errors.price[0]} />}

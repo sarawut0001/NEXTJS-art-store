@@ -50,3 +50,16 @@ export const uploadToImageKit = async (file: File, label: string) => {
     return { message: "Failed to upload image" };
   }
 };
+
+export const deleteFromImageKit = async (fileId: string) => {
+  try {
+    if (!fileId) {
+      return { message: "No file id" };
+    }
+
+    await imagekit.deleteFile(fileId);
+  } catch (error) {
+    console.error("Error deleting image from imageKit: ", error);
+    return { message: "Failed to delte image" };
+  }
+};

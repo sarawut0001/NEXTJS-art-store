@@ -34,7 +34,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import DeleteProductModal from "./DeleteProductModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RestoreProductModal from "./RestoreProductModal";
 
 interface ProductListProps {
@@ -42,12 +42,35 @@ interface ProductListProps {
 }
 
 const ProductList = ({ products }: ProductListProps) => {
+  // Tab State
+  const [activeTab, setActiveTab] = useState("all");
+  const [filteredProducts, setFilteredProducts] = useState(products);
+
+  // Modal State
   const [isDeleteModal, setIsDeleteModal] = useState(false);
   const [isRestoreModal, setIsRestoreModal] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
     null
   );
+
+  useEffect(() => {
+    let result = [...products];
+
+    if (activeTab === "active") {
+      result = result.filter((p) => p.status === "Active");
+    } else if (activeTab === "inactive") {
+      result = result.filter((p) => p.status === "Inactive");
+    } else if (activeTab === "low-stock") {
+      result = result.filter((p) => p.stock <= p.lowStock);
+    }
+
+    setFilteredProducts(result);
+  }, [products, activeTab]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
   const handleDeleteClick = (product: ProductType) => {
     setSelectedProduct(product);
@@ -74,7 +97,7 @@ const ProductList = ({ products }: ProductListProps) => {
             </Button>
           </div>
 
-          <Tabs>
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid grid-cols-4 mb-4">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
@@ -107,11 +130,7 @@ const ProductList = ({ products }: ProductListProps) => {
 
                 <Badge variant="outline" className="sm:px-3 py-1">
                   <span className="font-semibold text-amber-600">
-                    {
-                      products.filter(
-                        (p) => p.stock <= p.lowStock && p.status === "Active"
-                      ).length
-                    }
+                    {products.filter((p) => p.stock <= p.lowStock).length}
                   </span>
                   Low Stock
                 </Badge>
@@ -143,8 +162,8 @@ const ProductList = ({ products }: ProductListProps) => {
             </TableHeader>
 
             <TableBody>
-              {products.length > 0 ? (
-                products.map((p, index) => (
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((p, index) => (
                   <TableRow key={index}>
                     <TableCell>
                       <Image

@@ -46,19 +46,20 @@ export const getProducts = async () => {
             status: true,
           },
         },
-        images: {
-          where: { isMain: true },
-          take: 1,
-        },
+        images: true,
       },
     });
 
-    return products.map((product) => ({
-      ...product,
-      lowStock: 5,
-      sku: product.id.substring(0, 8).toUpperCase(),
-      mainImage: product.images.length > 0 ? product.images[0] : null,
-    }));
+    return products.map((product) => {
+      const mainImage = product.images.find((image) => image.isMain);
+
+      return {
+        ...product,
+        lowStock: 5,
+        sku: product.id.substring(0, 8).toUpperCase(),
+        mainImage,
+      };
+    });
   } catch (error) {
     console.error("Error getting products: ", error);
     return [];

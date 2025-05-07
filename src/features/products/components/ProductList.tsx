@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,12 +33,32 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import DeleteProductModal from "./DeleteProductModal";
+import { useState } from "react";
+import RestoreProductModal from "./RestoreProductModal";
 
 interface ProductListProps {
   products: ProductType[];
 }
 
 const ProductList = ({ products }: ProductListProps) => {
+  const [isDeleteModal, setIsDeleteModal] = useState(false);
+  const [isRestoreModal, setIsRestoreModal] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
+    null
+  );
+
+  const handleDeleteClick = (product: ProductType) => {
+    setSelectedProduct(product);
+    setIsDeleteModal(true);
+  };
+
+  const handleRestoreClick = (product: ProductType) => {
+    setSelectedProduct(product);
+    setIsRestoreModal(true);
+  };
+
   return (
     <>
       <Card>
@@ -206,12 +228,16 @@ const ProductList = ({ products }: ProductListProps) => {
                           <DropdownMenuSeparator />
 
                           {p.status === "Active" ? (
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(p)}
+                            >
                               <Trash2 size={15} className="text-destructive" />
                               <span className="text-destructive">Delete</span>
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleRestoreClick(p)}
+                            >
                               <RefreshCcw
                                 size={15}
                                 className="text-green-600"
@@ -238,6 +264,18 @@ const ProductList = ({ products }: ProductListProps) => {
           </Table>
         </CardContent>
       </Card>
+
+      <DeleteProductModal
+        open={isDeleteModal}
+        onOpenChange={setIsDeleteModal}
+        product={selectedProduct}
+      />
+
+      <RestoreProductModal
+        open={isRestoreModal}
+        onOpenChange={setIsRestoreModal}
+        product={selectedProduct}
+      />
     </>
   );
 };

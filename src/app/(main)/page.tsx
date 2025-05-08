@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
+import Hero from "@/components/customer-page/home/Hero";
 
 const HomePage = () => {
   return (
     <div>
-      <Button>Click</Button>
+      <Hero />
     </div>
   );
 };

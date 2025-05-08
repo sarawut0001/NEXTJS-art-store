@@ -111,6 +111,45 @@ export const getProductById = async (id: string) => {
   }
 };
 
+export const getFeatureProducts = async () => {
+  "use cache";
+
+  cacheLife("hours");
+  cacheTag(await getProductGlobalTag());
+
+  try {
+    const products = db.product.findMany({
+      take: 8,
+      where: { status: "Active" },
+      orderBy: { sold: "desc" },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            status: true,
+          },
+        },
+        images: true,
+      },
+    });
+
+    return (await products).map((product) => {
+      const mainImage = product.images.find((image) => image.isMain);
+
+      return {
+        ...product,
+        lowStock: 5,
+        sku: product.id.substring(0, 8).toUpperCase(),
+        mainImage,
+      };
+    });
+  } catch (error) {
+    console.error("Error getting feature products: ", error);
+    return [];
+  }
+};
+
 export const createProduct = async (input: CreateProductInput) => {
   const user = await authCheck();
 

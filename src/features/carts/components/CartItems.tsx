@@ -12,7 +12,7 @@ import { removeFromCartAction, updateCartItemAction } from "../actions/carts";
 import { toast } from "sonner";
 
 interface CartItemsProps {
-  cart: CartType | null;
+  cart: CartType;
 }
 
 const CartItems = ({ cart }: CartItemsProps) => {

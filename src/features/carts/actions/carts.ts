@@ -1,6 +1,6 @@
 "use server";
 
-import { addToCart } from "../db/carts";
+import { addToCart, updateCardItem } from "../db/carts";
 
 export const addToCartAction = async (formData: FormData) => {
   const data = {
@@ -19,6 +19,22 @@ export const addToCartAction = async (formData: FormData) => {
     return {
       success: true,
       message: "Add products to cart successfully!",
+    };
+  }
+};
+
+export const updateCartItemAction = async (formData: FormData) => {
+  const data = {
+    cartItemId: formData.get("cart-item-id") as string,
+    newCount: parseInt(formData.get("new-count") as string) || 1,
+  };
+
+  const result = await updateCardItem(data);
+
+  if (result && result.message) {
+    return {
+      success: false,
+      message: result.message,
     };
   }
 };

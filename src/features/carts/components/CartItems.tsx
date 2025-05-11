@@ -7,7 +7,7 @@ import { CartType } from "@/types/cart";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { removeFromCartAction, updateCartItemAction } from "../actions/carts";
 import { toast } from "sonner";
 
@@ -15,27 +15,99 @@ interface CartItemsProps {
   cart: CartType;
 }
 
+interface CartOptimistic {
+  type: "update" | "remove";
+  itemId: string;
+  newCount?: number;
+}
+
 const CartItems = ({ cart }: CartItemsProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPending, startTransition] = useTransition();
 
+  const [opCart, updateOpCart] = useOptimistic(
+    cart,
+    (state, { type, itemId, newCount }: CartOptimistic) => {
+      if (type === "update" && newCount !== undefined) {
+        const updatedItems = state.items.map((item) => {
+          if (item.id === itemId) {
+            const newPrice = newCount * item.product.price;
+            return {
+              ...item,
+              count: newCount,
+              price: newPrice,
+            };
+          }
+
+          return item;
+        });
+
+        const newTotal = updatedItems.reduce(
+          (sum, item) => sum + item.price,
+          0
+        );
+
+        const newItemCount = updatedItems.reduce(
+          (sum, item) => sum + item.count,
+          0
+        );
+
+        return {
+          ...state,
+          items: updatedItems,
+          cartTotal: newTotal,
+          itemCount: newItemCount,
+        };
+      }
+
+      if (type === "remove") {
+        const updatedItems = state.items.filter((item) => itemId !== item.id);
+
+        const newTotal = updatedItems.reduce(
+          (sum, item) => sum + item.price,
+          0
+        );
+
+        const newItemCount = updatedItems.reduce(
+          (sum, item) => sum + item.count,
+          0
+        );
+
+        return {
+          ...state,
+          items: updatedItems,
+          cartTotal: newTotal,
+          itemCount: newItemCount,
+        };
+      }
+
+      return state;
+    }
+  );
+
   if (!cart) return null;
 
-  const handleUpdateQty = (itemId: string, newCount: number) => {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append("cart-item-id", itemId);
-      formData.append("new-count", newCount.toString());
-
-      const result = await updateCartItemAction(formData);
-
-      if (result && result.message) {
-        toast.error(result.message);
-      }
+  const handleUpdateQty = async (itemId: string, newCount: number) => {
+    startTransition(() => {
+      updateOpCart({ type: "update", itemId, newCount });
     });
+
+    const formData = new FormData();
+    formData.append("cart-item-id", itemId);
+    formData.append("new-count", newCount.toString());
+
+    const result = await updateCartItemAction(formData);
+
+    if (result && result.message) {
+      toast.error(result.message);
+    }
   };
 
   const handleRemoveItem = async (itemId: string) => {
+    startTransition(() => {
+      updateOpCart({ type: "remove", itemId });
+    });
+
     const result = await removeFromCartAction(itemId);
 
     if (result && result.message) {
@@ -47,7 +119,7 @@ const CartItems = ({ cart }: CartItemsProps) => {
     <Card className="p-4">
       <h2 className="text-xl font-semibold mb-4">Items in cart</h2>
 
-      {cart.items.map((item, index) => (
+      {opCart.items.map((item, index) => (
         <div key={index} className="flex flex-col sm:flex-row gap-4 pb-4">
           <div className="relative size-24 border border-primary rounded-md overflow-hidden">
             <Link href={`/products/${item.product.id}`}>

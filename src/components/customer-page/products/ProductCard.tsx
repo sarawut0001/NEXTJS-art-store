@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+import AddToCartButton from "@/features/carts/components/AddToCartButton";
 
 interface ProductCardProps {
   product: ProductType;
@@ -94,14 +93,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </CardContent>
 
       <CardFooter className="p-3 gap-2">
-        <Button
+        <AddToCartButton
+          productId={product.id}
+          stock={product.stock}
           className="w-full gap-1"
-          size="sm"
-          disabled={product.stock <= 0}
-        >
-          <ShoppingCart size={16} />
-          <span>Add to cart</span>
-        </Button>
+        />
       </CardFooter>
     </Card>
   );

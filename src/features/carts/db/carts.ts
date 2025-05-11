@@ -9,7 +9,7 @@ import { authCheck } from "@/features/auths/db/auths";
 import { canUpdateUserCart } from "../permissions/carts";
 
 interface AddToCartInput {
-  porductId: string;
+  productId: string;
   count: number;
 }
 
@@ -118,7 +118,7 @@ export const addToCart = async (input: AddToCartInput) => {
 
   try {
     const product = await db.product.findUnique({
-      where: { id: input.porductId, status: "Active" },
+      where: { id: input.productId, status: "Active" },
     });
 
     if (!product) {

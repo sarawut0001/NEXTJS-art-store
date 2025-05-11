@@ -1,6 +1,6 @@
 "use server";
 
-import { addToCart, updateCardItem } from "../db/carts";
+import { addToCart, removeFromCart, updateCardItem } from "../db/carts";
 
 export const addToCartAction = async (formData: FormData) => {
   const data = {
@@ -30,6 +30,17 @@ export const updateCartItemAction = async (formData: FormData) => {
   };
 
   const result = await updateCardItem(data);
+
+  if (result && result.message) {
+    return {
+      success: false,
+      message: result.message,
+    };
+  }
+};
+
+export const removeFromCartAction = async (cartItemId: string) => {
+  const result = await removeFromCart(cartItemId);
 
   if (result && result.message) {
     return {

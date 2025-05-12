@@ -7,7 +7,6 @@ interface CartIconProps {
 }
 
 const CartIcon = ({ itemCount }: CartIconProps) => {
-  console.log("itemCount", itemCount);
   return (
     <Link href="/cart" className="md:hidden relative">
       <ShoppingBag size={20} />

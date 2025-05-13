@@ -22,3 +22,20 @@ export const getStatusText = (status: OrderStatus): string => {
       return status;
   }
 };
+
+export const getStatusColor = (status: OrderStatus): string => {
+  switch (status) {
+    case "Pending":
+      return "bg-yellow-500";
+    case "Paid":
+      return "bg-blue-500";
+    case "Shipped":
+      return "bg-indigo-500";
+    case "Delivered":
+      return "bg-green-500";
+    case "Cancelled":
+      return "bg-red-500";
+    default:
+      return status;
+  }
+};

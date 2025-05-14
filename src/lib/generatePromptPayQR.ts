@@ -1,6 +1,6 @@
 export const generatePromptPayQR = async (amount: number) => {
   try {
-    const promptpayId = process.env.PROMPTPAY_ID;
+    const promptpayId = process.env.NEXT_PUBLIC_PROMPTPAY_ID;
 
     const formatedAmount = amount.toFixed(2);
 

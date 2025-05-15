@@ -171,15 +171,20 @@ export const getAllOrder = async (userId: string, status?: OrderStatus) => {
           const mainImage = item.product.images.find((image) => image.isMain);
 
           return {
-            ...item.product,
-            lowStock: 5,
-            sku: item.productId.substring(0, 8).toUpperCase(),
-            mainImage,
+            ...item,
+            product: {
+              ...item.product,
+              lowStock: 5,
+              sku: item.productId.substring(0, 8).toUpperCase(),
+              mainImage,
+            },
           };
         }),
 
         createdAtFormatted: formatDate(order.createdAt),
-        paymentFormatted: order.paymentAt ? formatDate(order.paymentAt) : null,
+        paymentAtFormatted: order.paymentAt
+          ? formatDate(order.paymentAt)
+          : null,
         totalItems: order.items.reduce((sum, item) => sum + item.quantity, 0),
       };
     });

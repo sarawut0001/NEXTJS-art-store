@@ -1,11 +1,17 @@
 import { authCheck } from "@/features/auths/db/auths";
 import { redirect } from "next/navigation";
-import { canCreateOrder } from "../permissions/order";
+import { canCancelOrder, canCreateOrder } from "../permissions/order";
 import { checkoutSchema } from "../schemas/order";
 import { db } from "@/lib/db";
 import { generateOrderNumber } from "@/lib/generateOrderNumber";
 import { clearCart } from "@/features/carts/db/carts";
-import { revalidateOrderCache } from "./cache";
+import { getOrderIdTag, revalidateOrderCache } from "./cache";
+import {
+  unstable_cacheLife as cacheLife,
+  unstable_cacheTag as cacheTag,
+} from "next/cache";
+import formatDate from "@/lib/formatDate";
+import { uploadToImageKit } from "@/lib/imageKit";
 
 interface CheckoutInput {
   address: string;
@@ -124,5 +130,151 @@ export const createOrder = async (input: CheckoutInput) => {
     }
 
     return { message: "Create order went wrong. Please try again later." };
+  }
+};
+
+export const getOrderById = async (userId: string, orderId: string) => {
+  "use cache";
+
+  if (!userId) redirect("/auth/signin");
+
+  cacheLife("minutes");
+  cacheTag(await getOrderIdTag(orderId));
+
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: true,
+        items: {
+          include: {
+            product: {
+              include: {
+                category: true,
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) return null;
+
+    const items = order.items.map((item) => {
+      const mainImage = item.product.images.find((image) => image.isMain);
+
+      return {
+        ...item,
+        product: {
+          ...item.product,
+          mainImage,
+          lowStock: 5,
+          sku: item.product.id.substring(0, 8).toUpperCase(),
+        },
+      };
+    });
+
+    return {
+      ...order,
+      items,
+      createdAtFormatted: formatDate(order.createdAt),
+      paymentAtFormatted: order.paymentAt ? formatDate(order.paymentAt) : null,
+    };
+  } catch (error) {
+    console.error(`Error getting order: ${orderId}`, error);
+    return null;
+  }
+};
+
+export const uploadPaymentSlip = async (orderId: string, file: File) => {
+  const user = await authCheck();
+
+  if (!user) redirect("/auth/signin");
+
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) return { message: "Order is not found" };
+
+    if (order.customerId !== user.id) return { message: "Is not your order!" };
+
+    if (order.status !== "Pending")
+      return {
+        message: "Unable to upload proof of payment. This order has been paid.",
+      };
+
+    const uploadResult = await uploadToImageKit(file, "payment");
+
+    if (!uploadResult || uploadResult.message) {
+      return {
+        message: uploadResult.message || "Can not upload image",
+      };
+    }
+
+    const updatedOrder = await db.order.update({
+      where: { id: orderId },
+      data: {
+        paymentImage: uploadResult.url,
+        status: "Paid",
+        paymentAt: new Date(),
+      },
+    });
+
+    revalidateOrderCache(updatedOrder.id, updatedOrder.customerId);
+  } catch (error) {
+    console.error("Error uploading payment slip: ", error);
+    return {
+      message: "Upload payment slip went wrong, Please try again later.",
+    };
+  }
+};
+
+export const cancelOrderStatus = async (orderId: string) => {
+  const user = await authCheck();
+
+  if (!user || !canCancelOrder(user)) redirect("/auth/signin");
+
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (!order) return { message: "Order is not found" };
+
+    if (order.customerId !== user.id) return { message: "Is not your order!" };
+
+    if (order.status !== "Pending")
+      return {
+        message:
+          "Can not cancel order. This order has been paid. Please contact us for further inquiries.",
+      };
+
+    await db.$transaction(async (prisma) => {
+      for (const item of order.items) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: { increment: item.quantity },
+            sold: { decrement: item.quantity },
+          },
+        });
+      }
+
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: "Cancelled",
+        },
+      });
+    });
+
+    revalidateOrderCache(orderId, user.id);
+  } catch (error) {
+    console.error("Error canceling order: ", error);
+    return { message: "Cancel order went wrong, Please try again later." };
   }
 };

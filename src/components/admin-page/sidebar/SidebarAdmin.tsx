@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  ClipboardList,
   FolderTree,
   LayoutDashboard,
   LogOut,
@@ -40,6 +41,11 @@ const SidebarAdmin = ({ user }: SidebarAdminProps) => {
       label: "Products",
       href: "/admin/products",
       icon: <ShoppingCart size={20} />,
+    },
+    {
+      label: "Orders",
+      href: "/admin/orders",
+      icon: <ClipboardList size={20} />,
     },
   ];
 

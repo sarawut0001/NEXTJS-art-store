@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createOrder, uploadPaymentSlip } from "../db/order";
+import { cancelOrderStatus, createOrder, uploadPaymentSlip } from "../db/order";
 import { InitialFormState } from "@/types/action";
 
 export const checkoutAction = async (
@@ -45,5 +45,24 @@ export const updatePaymentAction = async (
     : {
         success: true,
         message: "Upload proof of payment successfully!",
+      };
+};
+
+export const cancelOrderStatusAction = async (
+  _prevState: InitialFormState,
+  formData: FormData
+) => {
+  const orderId = formData.get("order-id") as string;
+
+  const result = await cancelOrderStatus(orderId);
+
+  return result && result.message
+    ? {
+        success: false,
+        message: result.message,
+      }
+    : {
+        success: true,
+        message: "Cancel order successfully!",
       };
 };

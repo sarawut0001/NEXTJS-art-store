@@ -16,5 +16,5 @@ export const getUserOrderTag = (userId: string) => {
 export const revalidateOrderCache = async (orderId: string, userId: string) => {
   revalidateTag(await getOrderGlobalTag());
   revalidateTag(await getOrderIdTag(orderId));
-  revalidateTag(await getUserOrderTag(userId));
+  revalidateTag(getUserOrderTag(userId));
 };

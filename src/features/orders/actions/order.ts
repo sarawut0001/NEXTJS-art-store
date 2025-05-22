@@ -1,7 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { cancelOrderStatus, createOrder, uploadPaymentSlip } from "../db/order";
+import {
+  cancelOrderStatus,
+  createOrder,
+  updateOrderStatus,
+  uploadPaymentSlip,
+} from "../db/order";
 import { InitialFormState } from "@/types/action";
 
 export const checkoutAction = async (
@@ -64,5 +69,24 @@ export const cancelOrderStatusAction = async (
     : {
         success: true,
         message: "Cancel order successfully!",
+      };
+};
+
+export const updateOrderStatusAction = async (formData: FormData) => {
+  const data = {
+    orderId: formData.get("order-id") as string,
+    status: formData.get("status") as string,
+    trackingNumber: formData.get("tracking") as string,
+  };
+  const result = await updateOrderStatus(data);
+
+  return result && result.message
+    ? {
+        success: false,
+        message: result.message,
+      }
+    : {
+        success: true,
+        message: "Update order status successfully!",
       };
 };

@@ -37,12 +37,26 @@ import DeleteProductModal from "./DeleteProductModal";
 import { useEffect, useState } from "react";
 import RestoreProductModal from "./RestoreProductModal";
 import ProductDetailModal from "./ProductDetailModal";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface ProductListProps {
   products: ProductType[];
+  totalCount: number;
+  page: number;
+  limit: number;
 }
 
-const ProductList = ({ products }: ProductListProps) => {
+const ProductList = ({
+  products,
+  totalCount,
+  page,
+  limit,
+}: ProductListProps) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const totalPages = Math.ceil(totalCount / limit);
+
   // Tab State
   const [activeTab, setActiveTab] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState(products);
@@ -102,7 +116,11 @@ const ProductList = ({ products }: ProductListProps) => {
     setIsDetailModal(true);
   };
 
-  console.log("select", selectedProduct);
+  const handlePageChange = (newPage: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", newPage.toString());
+    router.push(`/admin/products?${newParams.toString()}`);
+  };
 
   return (
     <>
@@ -309,6 +327,24 @@ const ProductList = ({ products }: ProductListProps) => {
               )}
             </TableBody>
           </Table>
+
+          <div className="flex justify-between items-center mt-8">
+            <Button
+              disabled={page <= 1}
+              onClick={() => handlePageChange(page - 1)}
+            >
+              Previous
+            </Button>
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              disabled={page >= totalPages}
+              onClick={() => handlePageChange(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

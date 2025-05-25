@@ -3,10 +3,11 @@ import { revalidateUserCache } from "@/features/users/db/cache";
 import { getUserById } from "@/features/users/db/users";
 import { db } from "@/lib/db";
 import { genSalt, hash, compare } from "bcrypt";
-import { SignJWT } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 import { cookies, headers } from "next/headers";
 import { Resend } from "resend";
 import EmailTemplate from "../components/EmailTemplate";
+import { JWTExpired } from "jose/errors";
 
 interface SignupInput {
   name: string;
@@ -18,6 +19,12 @@ interface SignupInput {
 interface SigninInput {
   email: string;
   password: string;
+}
+
+interface ResetPasswordInput {
+  token: string;
+  password: string;
+  confirmPassword: string;
 }
 
 const generateJwtToken = async (userId: string, exp: string = "30d") => {
@@ -168,5 +175,34 @@ export const sendResetPasswordEmail = async (email: string) => {
   } catch (error) {
     console.error("Error sending reset password email", error);
     return { message: "เกิดข้อผิดพลาดในการส่งคำขอรีเซ็ตรหัสผ่าน" };
+  }
+};
+
+export const resetPassword = async (input: ResetPasswordInput) => {
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
+    const { payload } = await jwtVerify(input.token, secret);
+
+    if (input.password !== input.confirmPassword)
+      return { message: "รหัสผ่านไม่ตรงกัน" };
+
+    const salt = await genSalt(10);
+    const hashedPassword = await hash(input.password, salt);
+
+    const updatedUser = await db.user.update({
+      where: { id: payload.id as string },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    revalidateUserCache(updatedUser.id);
+  } catch (error) {
+    console.error("Error resetting password: ", error);
+
+    if (error instanceof JWTExpired)
+      return { message: "คำขอของคุณหมดอายุแล้ว" };
+
+    return { message: "เกิดข้อผิดพลาดในการกู้คืนรหัสผ่าน" };
   }
 };

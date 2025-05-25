@@ -47,7 +47,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
         <SubmitBtn
           name={type === "signup" ? "สมัครสมาชิก" : "เข้าสู่ระบบ"}
           pending={isPending}
-          className="w-full"
+          className="w-full mt-2"
         />
       </CardFooter>
     </Form>

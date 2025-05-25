@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { genSalt, hash, compare } from "bcrypt";
 import { SignJWT } from "jose";
 import { cookies, headers } from "next/headers";
+import { Resend } from "resend";
+import EmailTemplate from "../components/EmailTemplate";
 
 interface SignupInput {
   name: string;
@@ -18,12 +20,12 @@ interface SigninInput {
   password: string;
 }
 
-const generateJwtToken = async (userId: string) => {
+const generateJwtToken = async (userId: string, exp: string = "30d") => {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
   return await new SignJWT({ id: userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("30d")
+    .setExpirationTime(exp)
     .sign(secret);
 };
 
@@ -140,5 +142,31 @@ export const signout = async () => {
   } catch (error) {
     console.error("Error sign out user: ", error);
     return { message: "เกิดข้อผิดพลาดในการออกจากระบบ" };
+  }
+};
+
+export const sendResetPasswordEmail = async (email: string) => {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  try {
+    const user = await db.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) return { message: "ไม่พบบัญชีที่ใช้อีเมลนี้" };
+
+    const token = await generateJwtToken(user.id, "15m");
+
+    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-password?token=${token}`;
+
+    await resend.emails.send({
+      from: "Art Store <onboarding@resend.dev>",
+      to: email,
+      subject: "รีเซ็ตรหัสผ่านของคุณ",
+      react: EmailTemplate({ fname: user.name || user.email, resetLink }),
+    });
+  } catch (error) {
+    console.error("Error sending reset password email", error);
+    return { message: "เกิดข้อผิดพลาดในการส่งคำขอรีเซ็ตรหัสผ่าน" };
   }
 };

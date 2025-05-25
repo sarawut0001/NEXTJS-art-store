@@ -1,7 +1,12 @@
 "use server";
 
 import { InitialFormState } from "@/types/action";
-import { signin, signup, signout } from "@/features/auths/db/auths";
+import {
+  signin,
+  signup,
+  signout,
+  sendResetPasswordEmail,
+} from "@/features/auths/db/auths";
 
 export const authAction = async (
   _prevState: InitialFormState,
@@ -33,4 +38,17 @@ export const signoutAction = async () => {
   return result && result.message
     ? { success: false, message: result.message }
     : { success: true, message: "ออกจากระบบสำเร็จ" };
+};
+
+export const forgotPasswordAction = async (
+  _prevState: InitialFormState,
+  formData: FormData
+) => {
+  const email = formData.get("email") as string;
+
+  const result = await sendResetPasswordEmail(email);
+
+  return result && result.message
+    ? { success: false, message: result.message }
+    : { success: true, message: "เราส่งอีเมลเพื่อขอกู้รหัสผ่านเรียบร้อยแล้ว" };
 };
